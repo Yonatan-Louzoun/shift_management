@@ -1,0 +1,103 @@
+:root {
+    --primary-pink: #fce4ec;
+    --deep-pink: #d81b60;
+    --accent-gold: #c5a059;
+    --soft-bg: #fff9fa;
+    --text-color: #4a4a4a;
+    --white: #ffffff;
+    --shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+body {
+    font-family: 'Assistant', sans-serif;
+    margin: 0;
+    background-color: var(--soft-bg);
+    color: var(--text-color);
+    direction: rtl;
+}
+
+.app-container { display: flex; height: 100vh; overflow: hidden; }
+
+/* Sidebar - חזר לצד ימין (ברירת מחדל ב-RTL) */
+.sidebar {
+    width: 260px;
+    background: #2d3436;
+    color: white;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    z-index: 1001;
+    /* הוסר ה-order שדחף לשמאל */
+}
+
+.brand { display: flex; align-items: center; gap: 15px; font-size: 1.6rem; font-weight: 700; margin-bottom: 50px; }
+.logo-circle { width: 35px; height: 35px; background: var(--deep-pink); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+.team-card { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; border-right: 4px solid var(--deep-pink); }
+.team-list { list-style: none; padding: 0; margin-top: 10px; line-height: 2.2; font-weight: 300; }
+
+/* Main Content */
+.main-content { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; }
+
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+
+.month-nav { display: flex; align-items: center; gap: 15px; background: white; padding: 8px 20px; border-radius: 50px; box-shadow: var(--shadow); }
+.month-nav h2 { margin: 0; font-size: 1.2rem; color: var(--deep-pink); min-width: 280px; text-align: center; }
+.nav-circle { background: var(--primary-pink); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; color: var(--deep-pink); font-weight: bold; }
+
+/* Calendar */
+.calendar-wrapper { background: white; border-radius: 20px; box-shadow: var(--shadow); overflow: hidden; border: 1px solid #fce4ec; }
+.week-labels { display: grid; grid-template-columns: repeat(7, 1fr); background: #fff1f3; text-align: center; font-weight: 700; padding: 12px 0; color: var(--deep-pink); }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); background: #eee; gap: 1px; }
+
+.day-cell { background: white; min-height: 110px; padding: 8px; cursor: pointer; transition: 0.2s; position: relative; }
+.day-cell:hover { background: #fffcfd; }
+
+.date-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+.date-num { font-weight: 800; font-size: 1rem; }
+.hebrew-date { font-size: 0.7rem; color: var(--accent-gold); font-weight: 600; }
+
+/* Tags */
+.tag { font-size: 0.7rem; padding: 4px 6px; border-radius: 5px; margin-bottom: 3px; color: white; }
+.tag.בוקר { background: #f06292; }
+.tag.ערב { background: #9575cd; }
+.tag.כל_היום { background: #e91e63; }
+.tag-user { font-weight: 700; display: block; border-bottom: 1px solid rgba(255,255,255,0.2); margin-bottom: 2px; }
+
+/* Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(5px); z-index: 2000; justify-content: center; align-items: center; }
+.modal-card { background: white; width: 95%; max-width: 420px; border-radius: 25px; padding: 25px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+.modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+.close-modal { background: none; border: none; font-size: 2rem; cursor: pointer; }
+.hebrew-subtitle { color: var(--accent-gold); display: block; margin-top: 5px; }
+
+.field { display: flex; flex-direction: column; margin-bottom: 12px; }
+.field.checkbox { flex-direction: row; align-items: center; gap: 8px; font-size: 0.9rem; }
+select, textarea { padding: 10px; border: 1px solid #fce4ec; border-radius: 10px; font-family: inherit; }
+.save-btn { background: var(--deep-pink); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
+.existing-item { display: flex; justify-content: space-between; padding: 10px; background: #fff5f7; border-radius: 8px; margin-bottom: 5px; border-right: 3px solid var(--deep-pink); }
+.del-btn { background: #ff5252; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+
+/* Legend */
+.legend { display: flex; gap: 10px; font-size: 0.8rem; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-left: 3px; }
+.dot.boker { background: #f06292; }
+.dot.erev { background: #9575cd; }
+.dot.allday { background: #e91e63; }
+
+/* Mobile Optimization */
+.mobile-header { display: none; width: 100%; padding: 15px; background: white; border-bottom: 1px solid #eee; justify-content: space-between; align-items: center; }
+.close-sidebar-mobile { display: none; margin-top: 20px; background: var(--deep-pink); border: none; color: white; padding: 10px; border-radius: 5px; }
+
+@media (max-width: 768px) {
+    .app-container { flex-direction: column; }
+    /* במובייל התפריט יוצא מימין */
+    .sidebar { position: fixed; right: -100%; top: 0; bottom: 0; transition: 0.4s; }
+    .sidebar.open { right: 0; }
+    .mobile-header { display: flex; }
+    .close-sidebar-mobile { display: block; }
+    .calendar-header { flex-direction: column; align-items: center; }
+    .main-content { padding: 10px; }
+    .day-cell { min-height: 80px; }
+    .hebrew-date { font-size: 0.6rem; }
+}

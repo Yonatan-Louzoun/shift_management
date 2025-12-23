@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShiftMaster Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Rubik:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <header class="mobile-header">
+            <button id="mobileMenuBtn">☰</button>
+            <div class="mobile-brand">ShiftMaster ✨</div>
+        </header>
+
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <div class="logo-circle">🌸</div>
+                <span>ShiftMaster</span>
+            </div>
+            
+            <div class="team-card">
+                <h4>חברות וחברי הצוות</h4>
+                <ul class="team-list">
+                    <li>מוריה</li>
+                    <li>יונתן</li>
+                    <li>אורית</li>
+                    <li>ליהיא</li>
+                    <li>אביטל</li>
+                </ul>
+            </div>
+            
+            <button class="close-sidebar-mobile" id="closeSidebar">סגור תפריט</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="calendar-header">
+                <div class="month-nav">
+                    <button id="prevMonth" class="nav-circle">❮</button>
+                    <h2 id="monthTitle">טוען תאריך...</h2>
+                    <button id="nextMonth" class="nav-circle">❯</button>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><span class="dot boker"></span>בוקר</div>
+                    <div class="legend-item"><span class="dot erev"></span>ערב</div>
+                    <div class="legend-item"><span class="dot allday"></span>כל היום</div>
+                </div>
+            </header>
+
+            <div class="calendar-wrapper">
+                <div class="week-labels">
+                    <div>ראשון</div><div>שני</div><div>שלישי</div><div>רביעי</div><div>חמישי</div><div>שישי</div><div>שבת</div>
+                </div>
+                <div id="calendarGrid" class="calendar-grid"></div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <h3 id="displayDate"></h3>
+                    <small id="displayHebrewDate" class="hebrew-subtitle"></small>
+                </div>
+                <button class="close-modal">&times;</button>
+            </div>
+
+            <div class="constraints-view">
+                <h5>אילוצים קיימים:</h5>
+                <div id="constraintsList" class="constraints-scroll"></div>
+            </div>
+
+            <form id="constraintForm" class="beauty-form">
+                <h5>הוספת אילוץ חדש:</h5>
+                <div class="field">
+                    <label>מי האילוץ?</label>
+                    <select id="teamMember" required>
+                        <option value="">בחירה...</option>
+                        <option value="מוריה">מוריה</option>
+                        <option value="יונתן">יונתן</option>
+                        <option value="אורית">אורית</option>
+                        <option value="ליהיא">ליהיא</option>
+                        <option value="אביטל">אביטל</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>זמן המשמרת:</label>
+                    <select id="shiftType" required>
+                        <option value="בוקר">משמרת בוקר</option>
+                        <option value="ערב">משמרת ערב</option>
+                        <option value="כל היום">כל היום</option>
+                    </select>
+                </div>
+
+                <div class="field checkbox">
+                    <input type="checkbox" id="isRecurring">
+                    <label for="isRecurring">אילוץ קבוע לחודש זה</label>
+                </div>
+
+                <div class="field">
+                    <label>הערה אישית:</label>
+                    <textarea id="note" rows="2"></textarea>
+                </div>
+
+                <button type="submit" class="save-btn">שמור ביומן ✨</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
