@@ -3,116 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShiftMaster Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Rubik:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <title>ניהול משמרות</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <style>
+        body { background-color: #f8f9fa; padding: 20px; }
+        .card { margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <header class="mobile-header">
-            <button id="mobileMenuBtn">☰</button>
-            <div class="mobile-brand">ShiftMaster ✨</div>
-        </header>
+<div class="container">
+    <h1 class="text-center mb-4">לוח משמרות</h1>
+    
+    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#shiftModal">
+        ➕ הוסף משמרת חדשה
+    </button>
 
-        <aside class="sidebar" id="sidebar">
-            <div class="brand">
-                <div class="logo-circle">🌸</div>
-                <span>ShiftMaster</span>
-            </div>
-            
-            <div class="team-card">
-                <h4>חברות וחברי הצוות</h4>
-                <ul class="team-list">
-                    <li>מוריה</li>
-                    <li>יונתן</li>
-                    <li>אורית</li>
-                    <li>ליהיא</li>
-                    <li>אביטל</li>
-                </ul>
-            </div>
-            
-            <button class="close-sidebar-mobile" id="closeSidebar">סגור תפריט</button>
-        </aside>
-
-        <main class="main-content">
-            <header class="calendar-header">
-                <div class="month-nav">
-                    <button id="prevMonth" class="nav-circle">❮</button>
-                    <h2 id="monthTitle">טוען תאריך...</h2>
-                    <button id="nextMonth" class="nav-circle">❯</button>
-                </div>
-
-                <div class="legend">
-                    <div class="legend-item"><span class="dot boker"></span>בוקר</div>
-                    <div class="legend-item"><span class="dot erev"></span>ערב</div>
-                    <div class="legend-item"><span class="dot allday"></span>כל היום</div>
-                </div>
-            </header>
-
-            <div class="calendar-wrapper">
-                <div class="week-labels">
-                    <div>ראשון</div><div>שני</div><div>שלישי</div><div>רביעי</div><div>חמישי</div><div>שישי</div><div>שבת</div>
-                </div>
-                <div id="calendarGrid" class="calendar-grid"></div>
-            </div>
-        </main>
-    </div>
-
-    <div id="modalOverlay" class="modal-overlay">
-        <div class="modal-card">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <h3 id="displayDate"></h3>
-                    <small id="displayHebrewDate" class="hebrew-subtitle"></small>
-                </div>
-                <button class="close-modal">&times;</button>
-            </div>
-
-            <div class="constraints-view">
-                <h5>אילוצים קיימים:</h5>
-                <div id="constraintsList" class="constraints-scroll"></div>
-            </div>
-
-            <form id="constraintForm" class="beauty-form">
-                <h5>הוספת אילוץ חדש:</h5>
-                <div class="field">
-                    <label>מי האילוץ?</label>
-                    <select id="teamMember" required>
-                        <option value="">בחירה...</option>
-                        <option value="מוריה">מוריה</option>
-                        <option value="יונתן">יונתן</option>
-                        <option value="אורית">אורית</option>
-                        <option value="ליהיא">ליהיא</option>
-                        <option value="אביטל">אביטל</option>
-                    </select>
-                </div>
-
-                <div class="field">
-                    <label>זמן המשמרת:</label>
-                    <select id="shiftType" required>
-                        <option value="בוקר">משמרת בוקר</option>
-                        <option value="ערב">משמרת ערב</option>
-                        <option value="כל היום">כל היום</option>
-                    </select>
-                </div>
-
-                <div class="field checkbox">
-                    <input type="checkbox" id="isRecurring">
-                    <label for="isRecurring">אילוץ קבוע לחודש זה</label>
-                </div>
-
-                <div class="field">
-                    <label>הערה אישית:</label>
-                    <textarea id="note" rows="2"></textarea>
-                </div>
-
-                <button type="submit" class="save-btn">שמור ביומן ✨</button>
-            </form>
+    <div id="shiftsList" class="row">
         </div>
+</div>
+
+<div class="modal fade" id="shiftModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">פרטי משמרת</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <form id="shiftForm">
+        <div class="modal-body">
+            <div class="mb-3">
+                <label class="form-label">שם העובד</label>
+                <input type="text" id="employeeName" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">תאריך</label>
+                <input type="date" id="shiftDate" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">סוג משמרת</label>
+                <select id="shiftType" class="form-select">
+                    <option value="בוקר">בוקר</option>
+                    <option value="ערב">ערב</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ביטול</button>
+          <button type="submit" class="btn btn-primary">שמור</button>
+        </div>
+      </form>
+
     </div>
+  </div>
+</div>
 
-    <script type="module" src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+<script>
+    // --- 1. הגדרות FIREBASE ---
+    
+    const firebaseConfig = {
+        // *** הדבק כאן את הקונפיגורציה שלך מ-Firebase Console ***
+        // apiKey: "AIzaSyD...",
+        // authDomain: "...",
+        // projectId: "...",
+        // ...
+    };
+
+    // אתחול Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // --- 2. האזנה לשינויים במסד הנתונים (Real-time) ---
+    // הפונקציה הזו רצה אוטומטית בכל פעם שיש שינוי ב-Firebase
+    db.collection("shifts").orderBy("date", "asc").onSnapshot((snapshot) => {
+        const listDiv = document.getElementById("shiftsList");
+        listDiv.innerHTML = ""; // מנקה את הרשימה לפני שמצייר מחדש
+
+        snapshot.forEach((doc) => {
+            const shift = doc.data();
+            listDiv.innerHTML += `
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">${shift.name}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">${shift.date}</h6>
+                            <p class="card-text">משמרת: ${shift.type}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    });
+
+    // --- 3. פונקציית השמירה (התיקון שלך) ---
+    document.getElementById("shiftForm").addEventListener("submit", async function(event) {
+        event.preventDefault(); // מונע רענון דף
+
+        // איסוף נתונים
+        const newShift = {
+            name: document.getElementById("employeeName").value,
+            date: document.getElementById("shiftDate").value,
+            type: document.getElementById("shiftType").value,
+            createdAt: new Date()
+        };
+
+        try {
+            // שמירה ב-DB
+            await db.collection("shifts").add(newShift);
+            
+            // --- התיקונים הקריטיים: ---
+            
+            // א. סגירת החלון
+            const modalElement = document.getElementById('shiftModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            modalInstance.hide();
+
+            // ב. איפוס הטופס
+            document.getElementById("shiftForm").reset();
+
+            console.log("נשמר בהצלחה!");
+            
+        } catch (error) {
+            console.error("שגיאה:", error);
+            alert("שגיאה בשמירה: " + error.message);
+        }
+    });
+
+</script>
+
 </body>
-
 </html>
