@@ -1,9 +1,36 @@
+// ייבוא פונקציות Firebase (גרסה יציבה 10.7.1)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// --- ההגדרות שלך מ-Firebase ---
+const firebaseConfig = {
+    apiKey: "AIzaSyDZlNeTqqGZHAChV1W62NPqig6RsjYJDyM",
+    authDomain: "shift-management-12d93.firebaseapp.com",
+    projectId: "shift-management-12d93",
+    storageBucket: "shift-management-12d93.firebasestorage.app",
+    messagingSenderId: "165089906528",
+    appId: "1:165089906528:web:330da5738de0528d8c9805",
+    measurementId: "G-CD8Z4S7VVN"
+};
+
+// אתחול האפליקציה והתחברות למסד הנתונים
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const constraintsCol = collection(db, "constraints");
+
+// משתנים גלובליים
 let currentViewDate = new Date();
-let constraints = JSON.parse(localStorage.getItem('teamConstraints')) || [];
+let constraints = []; 
+
+// --- האזנה בזמן אמת (Real-time Listener) ---
+// פונקציה זו רצה אוטומטית בכל פעם שיש שינוי ב-Firebase (מישהו הוסיף/מחק אילוץ)
+onSnapshot(constraintsCol, (snapshot) => {
+    constraints = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderCalendar(); // ריענון התצוגה לכולם בו זמנית
+});
 
 document.addEventListener('DOMContentLoaded', () => {
-    renderCalendar();
-
+    // מאזינים לכפתורים
     document.getElementById('prevMonth').onclick = () => changeMonth(-1);
     document.getElementById('nextMonth').onclick = () => changeMonth(1);
     document.querySelector('.close-modal').onclick = closeModal;
@@ -16,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('closeSidebar').onclick = closeModal;
 });
 
-// פונקציית המרה לגימטריה (כולל שנה)
+// --- פונקציות עזר לתאריך עברי (גימטריה) ---
 function toGematria(num) {
     if (num === 15) return 'ט"ו';
     if (num === 16) return 'ט"ז';
@@ -26,13 +53,12 @@ function toGematria(num) {
     const hundreds = ["", "ק", "ר", "ש", "ת"];
     
     let result = "";
-    // אלפים (לא מציגים בדרך כלל, רק את ה'תשפ"ו -> תשפ"ו)
-    let n = num % 1000; 
+    let n = num % 1000;
 
     // מאות
     if (n >= 100) {
         let h = Math.floor(n / 100);
-        while (h >= 400) { result += "ת"; h -= 400; n -= 400; } // טיפול במקרים נדירים
+        while (h >= 400) { result += "ת"; h -= 400; n -= 400; }
         if (h > 0 && h <= 4) result += hundreds[h];
         n %= 100;
     }
@@ -50,9 +76,8 @@ function toGematria(num) {
     return result.slice(0, -1) + '"' + result.slice(-1);
 }
 
-// קבלת שם החודש ושנה עברית לכותרת
+// כותרת חודש עברית + לועזית
 function getHebrewMonthTitle(date) {
-    // שימוש ב-Intl כדי לקבל את החודש והשנה העבריים
     const parts = new Intl.DateTimeFormat('he-u-ca-hebrew', {month: 'long', year: 'numeric'}).formatToParts(date);
     const month = parts.find(p => p.type === 'month').value;
     const year = parseInt(parts.find(p => p.type === 'year').value);
@@ -60,15 +85,17 @@ function getHebrewMonthTitle(date) {
     return `${month} ${toGematria(year)}`;
 }
 
-// קבלת יום עברי בגימטריה (לתאים)
+// יום עברי לתא
 function getHebrewDay(date) {
     const parts = new Intl.DateTimeFormat('he-u-ca-hebrew', {day: 'numeric'}).formatToParts(date);
     const dayNum = parseInt(parts.find(p => p.type === 'day').value);
     return toGematria(dayNum);
 }
 
+// --- פונקציית הרינדור (בניית הלוח) ---
 function renderCalendar() {
     const grid = document.getElementById('calendarGrid');
+    if (!grid) return; // הגנה למקרה שהדף לא נטען
     grid.innerHTML = '';
 
     const year = currentViewDate.getFullYear();
@@ -76,17 +103,19 @@ function renderCalendar() {
     
     const monthNames = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
     
-    // בניית הכותרת המשולבת
+    // כותרת משולבת
     const hebrewTitle = getHebrewMonthTitle(currentViewDate);
     document.getElementById('monthTitle').textContent = `${monthNames[month]} ${year} | ${hebrewTitle}`;
 
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+    // ריקים
     for (let i = 0; i < firstDay; i++) {
         grid.innerHTML += `<div class="day-cell empty"></div>`;
     }
 
+    // ימים
     for (let day = 1; day <= daysInMonth; day++) {
         const dateObj = new Date(year, month, day);
         const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -103,14 +132,17 @@ function renderCalendar() {
             </div>
         `;
 
+        // סינון אילוצים מה-Database
         const dayCons = constraints.filter(c => {
             if (c.type === 'single') return c.date === dateKey;
+            // בדיקת אילוץ חוזר (לפי יום בשבוע + חודש ושנה נוכחיים)
             return c.type === 'recurring' && c.dayOfWeek === dayOfWeek && c.month === month && c.year === year;
         });
 
         dayCons.forEach(con => {
             const tag = document.createElement('div');
-            const shiftClass = con.shift.replace(' ', '_');
+            // התאמת מחלקת CSS
+            const shiftClass = con.shift ? con.shift.replace(' ', '_') : 'כל_היום';
             tag.className = `tag ${shiftClass}`;
             tag.innerHTML = `
                 <span class="tag-user">${con.name}</span>
@@ -124,6 +156,7 @@ function renderCalendar() {
     }
 }
 
+// --- ניהול מודל ---
 let activeDateKey = '';
 let activeDayOfWeek = 0;
 
@@ -135,6 +168,10 @@ function openModal(dateKey, dayOfWeek, hebDay, dayCons) {
     
     const list = document.getElementById('constraintsList');
     list.innerHTML = '';
+
+    if(dayCons.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:#999;">אין אילוצים ליום זה</p>';
+    }
 
     dayCons.forEach(con => {
         const div = document.createElement('div');
@@ -149,36 +186,45 @@ function openModal(dateKey, dayOfWeek, hebDay, dayCons) {
     document.getElementById('modalOverlay').style.display = 'flex';
 }
 
-function handleAdd(e) {
+// --- הוספה ל-Firebase (אסינכרוני) ---
+async function handleAdd(e) {
     e.preventDefault();
+    
+    // יצירת אובייקט הנתונים
     const newCon = {
-        id: 'id_' + Math.random().toString(36).substr(2, 9),
         name: document.getElementById('teamMember').value,
         shift: document.getElementById('shiftType').value,
         type: document.getElementById('isRecurring').checked ? 'recurring' : 'single',
         note: document.getElementById('note').value,
         date: activeDateKey,
         dayOfWeek: activeDayOfWeek,
-        month: currentViewDate.getMonth(),
+        month: currentViewDate.getMonth(), // חשוב לאילוצים חוזרים
         year: currentViewDate.getFullYear()
     };
 
-    constraints.push(newCon);
-    saveData();
-    closeModal();
-    renderCalendar();
+    try {
+        // שליחה לשרת
+        await addDoc(constraintsCol, newCon);
+        closeModal();
+        // אין צורך לקרוא ל-renderCalendar ידנית, ה-onSnapshot יעשה זאת אוטומטית
+    } catch (error) {
+        console.error("Error adding document: ", error);
+        alert("אירעה שגיאה בשמירה. בדוק את החיבור לרשת.");
+    }
 }
 
-window.deleteConstraint = function(id) {
-    constraints = constraints.filter(c => c.id !== id);
-    saveData();
-    closeModal();
-    renderCalendar();
+// --- מחיקה מ-Firebase ---
+window.deleteConstraint = async function(id) {
+    if(!confirm("למחוק את האילוץ?")) return;
+    
+    try {
+        await deleteDoc(doc(db, "constraints", id));
+        closeModal();
+    } catch (error) {
+        console.error("Error removing document: ", error);
+        alert("שגיאה במחיקה.");
+    }
 };
-
-function saveData() {
-    localStorage.setItem('teamConstraints', JSON.stringify(constraints));
-}
 
 function changeMonth(dir) {
     currentViewDate.setMonth(currentViewDate.getMonth() + dir);
