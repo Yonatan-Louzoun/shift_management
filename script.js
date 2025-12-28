@@ -45,44 +45,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- פונקציות עזר לתאריך עברי (גימטריה) ---
 function toGematria(num) {
+    // טיפול ספציפי בשנים (אם המספר גדול מ-700, זו כנראה שנה)
+    if (num >= 700 && num < 1000) {
+        const yearSuffix = num - 700; // מקבלים למשל 86 עבור תשפ"ו
+        
+        const tens = ["", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ"];
+        const units = ["", "א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט"];
+        
+        let result = "תש"; // קידומת ל-5000
+        
+        if (yearSuffix >= 10) {
+            result += tens[Math.floor(yearSuffix / 10)];
+        }
+        result += units[yearSuffix % 10];
+        
+        // הוספת גרשיים/מרכאות לפי הכללים
+        if (result.length === 3) return result + "'";
+        return result.slice(0, -1) + '"' + result.slice(-1);
+    }
+
+    // לוגיקה רגילה לימים בחודש (1-30)
     if (num === 15) return 'ט"ו';
     if (num === 16) return 'ט"ז';
     
     const units = ["", "א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט"];
     const tens = ["", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ"];
-    const hundreds = ["", "ק", "ר", "ש", "ת"];
     
-    let result = "";
-    let n = num % 1000;
-
-    // מאות
-    if (n >= 100) {
-        let h = Math.floor(n / 100);
-        while (h >= 400) { result += "ת"; h -= 400; n -= 400; }
-        if (h > 0 && h <= 4) result += hundreds[h];
-        n %= 100;
+    let res = "";
+    if (num >= 10) {
+        res += tens[Math.floor(num / 10)];
     }
-
-    // עשרות
-    if (n >= 10) {
-        result += tens[Math.floor(n / 10)];
-        n %= 10;
-    }
-
-    // יחידות
-    result += units[n];
-
-    if (result.length === 1) return result + "'";
-    return result.slice(0, -1) + '"' + result.slice(-1);
+    res += units[num % 10];
+    
+    if (res.length === 1) return res + "'";
+    return res.slice(0, -1) + '"' + res.slice(-1);
 }
 
 // כותרת חודש עברית + לועזית
 function getHebrewMonthTitle(date) {
     const parts = new Intl.DateTimeFormat('he-u-ca-hebrew', {month: 'long', year: 'numeric'}).formatToParts(date);
     const month = parts.find(p => p.type === 'month').value;
-    const year = parseInt(parts.find(p => p.type === 'year').value);
+    const yearRaw = parts.find(p => p.type === 'year').value;
     
-    return `${month} ${toGematria(year)}`;
+    // ניקוי תווים שאינם מספרים והפיכה למספר (למשל 5786 הופך ל-786)
+    const yearNum = parseInt(yearRaw.replace(/[^0-9]/g, '')) % 1000;
+    
+    return `${month} ${toGematria(yearNum)}`;
 }
 
 // יום עברי לתא
@@ -140,16 +148,19 @@ function renderCalendar() {
         });
 
         dayCons.forEach(con => {
-            const tag = document.createElement('div');
-            // התאמת מחלקת CSS
-            const shiftClass = con.shift ? con.shift.replace(' ', '_') : 'כל_היום';
-            tag.className = `tag ${shiftClass}`;
-            tag.innerHTML = `
-                <span class="tag-user">${con.name}</span>
-                <span>${con.shift}</span>
-            `;
-            cell.appendChild(tag);
-        });
+    const tag = document.createElement('div');
+    // החלפת רווחים בקו תחתון עבור ה-CSS
+    const shiftClass = con.shift ? con.shift.replace(/\s+/g, '_') : 'כל_היום';
+    tag.className = `tag ${shiftClass}`;
+    
+    // בניית פורמט הטקסט: שם משמרת; הערה (אם קיימת)
+    const notePart = con.note ? `; ${con.note}` : "";
+    
+    tag.innerHTML = `
+        <span class="tag-content">${con.name} ${con.shift}${notePart}</span>
+    `;
+    cell.appendChild(tag);
+});
 
         cell.onclick = () => openModal(dateKey, dayOfWeek, hebDay, dayCons);
         grid.appendChild(cell);
@@ -236,3 +247,4 @@ function closeModal() {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('constraintForm').reset();
 }
+
